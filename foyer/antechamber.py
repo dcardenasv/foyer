@@ -60,13 +60,17 @@ def ante_atomtyping(molecule, atype_style, net_charge=0.0,
 
     # Confirm single connected molecule
     # Also possible that connectivity info is missing. Either case is a problem.
+    graph_nodes = []
     graph_edges = []
+    for atom in molecule.atoms:
+        graph_nodes.append(atom.idx)
     for bond in molecule.bonds:
         graph_edges.append([bond.atom1.idx,bond.atom2.idx])
     bond_graph = nx.Graph()
     bond_graph.add_edges_from(graph_edges)
+    bond_graph.add_nodes_from(graph_nodes)
     if not nx.is_connected(bond_graph):
-        raise ValueError("Antechamber requires connectivity information and "
+        raise FoyerError("Antechamber requires connectivity information and "
                          "only supports single molecules (i.e., all atoms "
                          "in the molecule are connected by bonds.")
 
@@ -90,6 +94,7 @@ def ante_atomtyping(molecule, atype_style, net_charge=0.0,
             out, err = proc.communicate()
 
             # Error handling here
+            # TODO: Check ante stdout for error syntax
             if 'ERROR' in out or proc.returncode != 0:
                 _antechamber_error(out,err)
 
